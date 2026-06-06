@@ -1,0 +1,50 @@
+name: bidts
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - pyyaml
+  - requests
+  - tqdm
+  - datasets
+  - transformers=4.38.2
+  - tokenizers
+  - safetensors
+  - pyarrow
+  - aiohttp
+  - httpx
+  - jupyter
+  - ipykernel
+  - ipywidgets
+  - pip:
+      - torch
+      - lightning
+      - pytorch-lightning
+      - torchmetrics
+      - fastapi
+      - uvicorn
+      - flask
+      - flask-cors
+      - fire
+      - loguru
+      - rich
+      - typer
+      - mlflow
+      - cvxpy
+      - gym
+      - lightgbm
+      - pyqlib==0.9.8.dev27
+      - google-genai
+      - pymongo
+      - redis
+      - sqlalchemy
+      - jupyterlab
+      - notebook

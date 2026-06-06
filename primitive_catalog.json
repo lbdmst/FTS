@@ -1,0 +1,2004 @@
+[
+  {
+    "function_name": "add_change_point",
+    "signature": "add_change_point(series: 'ArrayLike', anchor_timestep: 'int', *, level_change: 'float' = 0.0, slope_change: 'float' = 0.0, end_timestep: 'int | None' = None, smooth: 'bool' = False) -> 'FloatArray'",
+    "category": "structural",
+    "short_description": "Applies a level and/or slope change after an anchor timestep.",
+    "core_semantic_tags": [
+      "change_point",
+      "structural_change",
+      "level_shift",
+      "slope_shift",
+      "transition"
+    ],
+    "what_it_does": [
+      "Applies a post-anchor level change, slope change, or both.",
+      "Can model abrupt or smooth transitions.",
+      "Leaves the pre-anchor prefix untouched."
+    ],
+    "what_it_does_not_do": [
+      "Does not infer the breakpoint from data.",
+      "Does not create repeating oscillations.",
+      "Does not represent multiple separate breakpoints in one call."
+    ],
+    "required_parameters": [
+      {
+        "name": "anchor_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "level_change",
+        "default": 0
+      },
+      {
+        "name": "slope_change",
+        "default": 0
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "smooth",
+        "default": false
+      }
+    ],
+    "exact_effect_on_series": "Adds a weighted level change plus a post-anchor linear slope change over `[anchor_timestep, end_timestep]`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "level_change"
+      ],
+      [
+        "slope_change"
+      ]
+    ],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for post-anchor additive shifts rather than absolute level setting."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use as an overwrite-style plateau constructor."
+    ],
+    "typical_caption_cues": [
+      "change point",
+      "regime change",
+      "after timestep",
+      "turning point",
+      "slope changes",
+      "break in trend"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_change_point",
+        "anchor_timestep": 2,
+        "level_change": 2,
+        "slope_change": 1
+      },
+      "result_series": [
+        0,
+        0,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_change_point(series, anchor_timestep=2, level_change=2.0, slope_change=1.0)"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_decay",
+    "signature": "add_decay(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, start_value: 'float | None' = None, end_value: 'float | None' = None, decay_rate: 'float' = 1.0) -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Sets an interval to an exponential decay curve between exact bounds.",
+    "core_semantic_tags": [
+      "decay",
+      "curve",
+      "accelerating",
+      "interval",
+      "exact_value"
+    ],
+    "what_it_does": [
+      "Creates a monotone decreasing curved segment.",
+      "Allows exact start and end values.",
+      "Captures accelerated downward movement without adding extra events."
+    ],
+    "what_it_does_not_do": [
+      "Does not create an abrupt step change.",
+      "Does not create local troughs centered on a single point.",
+      "Does not preserve the old values inside the interval."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "start_value",
+        "default": null
+      },
+      {
+        "name": "end_value",
+        "default": null
+      },
+      {
+        "name": "decay_rate",
+        "default": 1
+      }
+    ],
+    "exact_effect_on_series": "Overwrites the interval with a normalized exponential decay curve from `start_value` to `end_value`.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for curved overwrite-style decay segments."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use for additive decay on top of an existing segment."
+    ],
+    "typical_caption_cues": [
+      "accelerating decline",
+      "curved drop",
+      "exponential decay",
+      "falls faster over time",
+      "decays toward"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_decay",
+        "start_timestep": 1,
+        "end_timestep": 4,
+        "start_value": 10,
+        "end_value": 2,
+        "decay_rate": 2
+      },
+      "result_series": [
+        0,
+        10,
+        5.498067,
+        3.186697,
+        2,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_decay(series, start_timestep=1, end_timestep=4, start_value=10.0, end_value=2.0, decay_rate=2.0)"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_dip",
+    "signature": "add_dip(series: 'ArrayLike', timestep: 'int', *, amplitude: 'float | None' = None, target_value: 'float | None' = None, width: 'int' = 0, half_width: 'int | None' = None) -> 'FloatArray'",
+    "category": "local_event",
+    "short_description": "Adds a sharp negative event centered on a timestep.",
+    "core_semantic_tags": [
+      "dip",
+      "sharp_event",
+      "negative_event",
+      "local_drop"
+    ],
+    "what_it_does": [
+      "Adds a sharp one-point or triangular negative event.",
+      "Supports exact target value or relative amplitude.",
+      "Works well for abrupt downward blips."
+    ],
+    "what_it_does_not_do": [
+      "Does not create a smooth valley like `add_trough`.",
+      "Does not create a sustained lower regime.",
+      "Does not mark missingness."
+    ],
+    "required_parameters": [
+      {
+        "name": "timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "amplitude",
+        "default": null
+      },
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "width",
+        "default": 0
+      },
+      {
+        "name": "half_width",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Subtracts either a single-point jump at `timestep` or a narrow triangular negative event centered at `timestep`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "amplitude"
+      ],
+      [
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "amplitude",
+        "target_value"
+      ],
+      [
+        "width",
+        "half_width"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for sharp downward events at one timestep or a very narrow window."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `amplitude` and `target_value`."
+    ],
+    "typical_caption_cues": [
+      "dip",
+      "sharp drop",
+      "brief drop",
+      "sudden fall",
+      "isolated negative event"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "call": {
+        "function": "add_dip",
+        "timestep": 3,
+        "target_value": 5
+      },
+      "result_series": [
+        10,
+        10,
+        10,
+        5,
+        10,
+        10,
+        10
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_dip(series, timestep=3, target_value=5.0)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass amplitude, target_value together.",
+          "call": {
+            "function": "add_dip",
+            "amplitude": "<value>",
+            "target_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_flat",
+    "signature": "add_flat(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, target_value: 'float') -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Sets every value in an interval to a constant target level.",
+    "core_semantic_tags": [
+      "flat",
+      "constant",
+      "level",
+      "interval"
+    ],
+    "what_it_does": [
+      "Creates a flat segment at a single target value.",
+      "Overwrites the whole interval deterministically.",
+      "Provides a direct primitive for stable plateaus or constant runs."
+    ],
+    "what_it_does_not_do": [
+      "Does not smooth into or out of the segment.",
+      "Does not preserve pre-existing local variation within the interval.",
+      "Does not imply a level shift outside the specified interval."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      },
+      {
+        "name": "target_value"
+      }
+    ],
+    "optional_parameters": [],
+    "exact_effect_on_series": "Overwrites all timesteps in `[start_timestep, end_timestep]` with `target_value`.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for exact flat intervals and plateaus."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not expect this to preserve within-interval variation."
+    ],
+    "typical_caption_cues": [
+      "flat",
+      "constant",
+      "stable at",
+      "remains at",
+      "fixed value",
+      "horizontal segment"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "call": {
+        "function": "add_flat",
+        "start_timestep": 1,
+        "end_timestep": 3,
+        "target_value": 7.5
+      },
+      "result_series": [
+        1,
+        7.5,
+        7.5,
+        7.5,
+        5
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_flat(series, start_timestep=1, end_timestep=3, target_value=7.5)"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_plateau",
+    "signature": "add_plateau(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, target_value: 'float | None' = None, anchor_timestep: 'int | None' = None) -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Overwrites an interval with a flat plateau using either an explicit target or an anchored level.",
+    "core_semantic_tags": [
+      "plateau",
+      "flat",
+      "constant",
+      "anchored_level"
+    ],
+    "what_it_does": [
+      "Creates a flat plateau over an inclusive interval.",
+      "Can copy the plateau height from an existing anchor timestep.",
+      "Provides a composition-friendly way to freeze a late segment at the current level."
+    ],
+    "what_it_does_not_do": [
+      "Does not smooth into or out of the plateau.",
+      "Does not preserve pre-existing within-interval variation.",
+      "Does not allow both an explicit target and an anchor source at the same time."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "target_value"
+      },
+      {
+        "name": "anchor_timestep"
+      }
+    ],
+    "exact_effect_on_series": "Overwrites all timesteps in `[start_timestep, end_timestep]` with either `target_value` or the value copied from `anchor_timestep`.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "target_value"
+      ],
+      [
+        "anchor_timestep"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "target_value",
+        "anchor_timestep"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use `anchor_timestep` when the plateau should inherit the already-established level."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `target_value` and `anchor_timestep`.",
+      "Do not assume this preserves any local variation within the plateau interval."
+    ],
+    "typical_caption_cues": [
+      "plateau",
+      "levels off",
+      "flattens out",
+      "final plateau",
+      "stabilizes at the end"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        1.0,
+        2.0,
+        3.5,
+        4.0,
+        5.0
+      ],
+      "call": {
+        "function": "add_plateau",
+        "start_timestep": 0,
+        "end_timestep": 2,
+        "anchor_timestep": 3
+      },
+      "result_series": [
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        5.0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Anchor a final plateau to the last point of a ramp.",
+          "code": "series = add_plateau(series, start_timestep=80, end_timestep=99, anchor_timestep=79)"
+        },
+        {
+          "description": "Use an explicit target when the plateau level is stated directly.",
+          "code": "series = add_plateau(series, start_timestep=20, end_timestep=40, target_value=7.5)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not provide both target_value and anchor_timestep.",
+          "call": {
+            "function": "add_plateau",
+            "start_timestep": 20,
+            "end_timestep": 40,
+            "target_value": 7.5,
+            "anchor_timestep": 19
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_gap",
+    "signature": "add_gap(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, fill_value: 'float' = nan) -> 'FloatArray'",
+    "category": "structural",
+    "short_description": "Replaces an interval with missing values or a chosen fill value.",
+    "core_semantic_tags": [
+      "gap",
+      "missing",
+      "missing_interval",
+      "mask"
+    ],
+    "what_it_does": [
+      "Marks an inclusive interval as missing.",
+      "Can also fill with a custom placeholder value.",
+      "Provides the atomic representation for explicit data gaps."
+    ],
+    "what_it_does_not_do": [
+      "Does not interpolate across the gap.",
+      "Does not create a valley or local trough.",
+      "Does not change values outside the chosen interval."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "fill_value",
+        "default": "nan"
+      }
+    ],
+    "exact_effect_on_series": "Overwrites every timestep in `[start_timestep, end_timestep]` with `fill_value` (default `NaN`).",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use only for explicit missing intervals or deliberate fill values."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use for normal dips or troughs."
+    ],
+    "typical_caption_cues": [
+      "gap",
+      "missing interval",
+      "missing values",
+      "data absent",
+      "masked segment"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "call": {
+        "function": "add_gap",
+        "start_timestep": 2,
+        "end_timestep": 4
+      },
+      "result_series": [
+        0,
+        1,
+        "nan",
+        "nan",
+        "nan",
+        5
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_gap(series, start_timestep=2, end_timestep=4)"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_growth",
+    "signature": "add_growth(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, start_value: 'float | None' = None, end_value: 'float | None' = None, growth_rate: 'float' = 1.0) -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Sets an interval to an exponential growth curve between exact bounds.",
+    "core_semantic_tags": [
+      "growth",
+      "curve",
+      "accelerating",
+      "interval",
+      "exact_value"
+    ],
+    "what_it_does": [
+      "Creates a monotone increasing curved segment.",
+      "Allows exact start and end values.",
+      "Captures accelerated upward movement with a single atomic curve primitive."
+    ],
+    "what_it_does_not_do": [
+      "Does not generate noise or volatility by itself.",
+      "Does not add a local spike centered at one timestep.",
+      "Does not automatically continue growth beyond the interval."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "start_value",
+        "default": null
+      },
+      {
+        "name": "end_value",
+        "default": null
+      },
+      {
+        "name": "growth_rate",
+        "default": 1
+      }
+    ],
+    "exact_effect_on_series": "Overwrites the interval with a normalized exponential growth curve from `start_value` to `end_value`.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for curved overwrite-style growth segments."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use for additive growth on top of an existing segment."
+    ],
+    "typical_caption_cues": [
+      "accelerating growth",
+      "curved increase",
+      "exponential growth",
+      "surges upward",
+      "increases faster over time"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_growth",
+        "start_timestep": 1,
+        "end_timestep": 4,
+        "start_value": 2,
+        "end_value": 10,
+        "growth_rate": 2
+      },
+      "result_series": [
+        0,
+        2,
+        3.186697,
+        5.498067,
+        10,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_growth(series, start_timestep=1, end_timestep=4, start_value=2.0, end_value=10.0, growth_rate=2.0)"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_level_shift",
+    "signature": "add_level_shift(series: 'ArrayLike', start_timestep: 'int | None' = None, *, anchor_timestep: 'int | None' = None, shift: 'float | None' = None, target_value: 'float | None' = None, end_timestep: 'int | None' = None, smooth: 'bool' = False) -> 'FloatArray'",
+    "category": "structural",
+    "short_description": "Applies a sustained level shift starting at a timestep.",
+    "core_semantic_tags": [
+      "level_shift",
+      "step_change",
+      "regime_shift",
+      "transition"
+    ],
+    "what_it_does": [
+      "Adds a sustained tail level shift after a start or anchor timestep.",
+      "Can express abrupt or smooth onset transitions.",
+      "Leaves the prefix before the shift untouched."
+    ],
+    "what_it_does_not_do": [
+      "Does not change slope unless combined with another primitive.",
+      "Does not create a temporary local event that later disappears.",
+      "Does not create multiple shifts in one call."
+    ],
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "start_timestep",
+        "default": null
+      },
+      {
+        "name": "anchor_timestep",
+        "default": null
+      },
+      {
+        "name": "shift",
+        "default": null
+      },
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "smooth",
+        "default": false
+      }
+    ],
+    "exact_effect_on_series": "Adds a level offset to `[start_timestep, end_timestep]`, optionally with smooth transition weights.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "start_timestep",
+        "shift"
+      ],
+      [
+        "start_timestep",
+        "target_value"
+      ],
+      [
+        "anchor_timestep",
+        "shift"
+      ],
+      [
+        "anchor_timestep",
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "shift",
+        "target_value"
+      ],
+      [
+        "start_timestep",
+        "anchor_timestep"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for tail shifts relative to the existing baseline, not as an overwrite plateau."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `shift` and `target_value`."
+    ],
+    "typical_caption_cues": [
+      "level shift",
+      "step change",
+      "moves to a new level",
+      "downward shift",
+      "upward shift",
+      "step-like increase"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_level_shift",
+        "start_timestep": 2,
+        "shift": 3
+      },
+      "result_series": [
+        0,
+        0,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_level_shift(series, start_timestep=2, shift=3.0)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass shift, target_value together.",
+          "call": {
+            "function": "add_level_shift",
+            "shift": "<value>",
+            "target_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_noise",
+    "signature": "add_noise(series: 'ArrayLike', start_timestep: 'int | None' = None, end_timestep: 'int | None' = None, *, noise_scale: 'float', random_seed: 'int | None' = None, random_generator: 'np.random.Generator | None' = None) -> 'FloatArray'",
+    "category": "stochastic",
+    "short_description": "Adds Gaussian noise over an interval.",
+    "core_semantic_tags": [
+      "noise",
+      "stochastic",
+      "volatility",
+      "randomness"
+    ],
+    "what_it_does": [
+      "Adds zero-mean Gaussian noise over an interval.",
+      "Supports deterministic replay through a seed or generator.",
+      "Provides a low-level primitive for random local variation."
+    ],
+    "what_it_does_not_do": [
+      "Does not control volatility relative to an existing baseline structure.",
+      "Does not produce deterministic periodic oscillations.",
+      "Does not infer noise scale from caption text."
+    ],
+    "required_parameters": [
+      {
+        "name": "noise_scale"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "start_timestep",
+        "default": null
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "random_seed",
+        "default": null
+      },
+      {
+        "name": "random_generator",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Adds independent Gaussian samples with standard deviation `noise_scale` to each timestep in the interval.",
+    "behavior": "stochastic_with_deterministic_seed_option",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "noise_scale"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "random_seed",
+        "random_generator"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use only with an explicit `random_seed` when stochastic behavior is necessary."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not omit `random_seed` in generated code."
+    ],
+    "typical_caption_cues": [
+      "noisy",
+      "random fluctuations",
+      "jitter",
+      "volatility",
+      "erratic small movements"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_noise",
+        "noise_scale": 0.5,
+        "random_seed": 123
+      },
+      "result_series": [
+        -0.494561,
+        -0.183893,
+        0.643963,
+        0.096987,
+        0.460115
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_noise(series, noise_scale=0.5, random_seed=123)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass random_seed, random_generator together.",
+          "call": {
+            "function": "add_noise",
+            "random_seed": "<value>",
+            "random_generator": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_outlier",
+    "signature": "add_outlier(series: 'ArrayLike', timestep: 'int', *, target_value: 'float | None' = None, relative_change: 'float | None' = None, delta: 'float | None' = None) -> 'FloatArray'",
+    "category": "local_event",
+    "short_description": "Sets a single timestep to an exact outlier value or relative jump.",
+    "core_semantic_tags": [
+      "outlier",
+      "point_anomaly",
+      "single_point",
+      "anomaly"
+    ],
+    "what_it_does": [
+      "Changes exactly one timestep.",
+      "Supports direct target-value specification or relative change.",
+      "Provides the most atomic point anomaly primitive in the library."
+    ],
+    "what_it_does_not_do": [
+      "Does not spread to neighboring timesteps.",
+      "Does not create a shaped spike or dip with width.",
+      "Does not encode a missing value gap."
+    ],
+    "required_parameters": [
+      {
+        "name": "timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "relative_change",
+        "default": null
+      },
+      {
+        "name": "delta",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Overwrites or offsets a single timestep and leaves all others unchanged.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "target_value"
+      ],
+      [
+        "relative_change"
+      ],
+      [
+        "delta"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "target_value",
+        "relative_change"
+      ],
+      [
+        "target_value",
+        "delta"
+      ],
+      [
+        "relative_change",
+        "delta"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Prefer `target_value` for exact one-point values and `delta` for explicit additive offsets."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass multiple one-point change modes in the same call."
+    ],
+    "typical_caption_cues": [
+      "outlier",
+      "anomaly",
+      "single-point jump",
+      "isolated point",
+      "one unusual value"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_outlier",
+        "timestep": 5,
+        "target_value": -9
+      },
+      "result_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        -9,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_outlier(series, timestep=5, target_value=-9.0)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass target_value, relative_change together.",
+          "call": {
+            "function": "add_outlier",
+            "target_value": "<value>",
+            "relative_change": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_peak",
+    "signature": "add_peak(series: 'ArrayLike', timestep: 'int', *, amplitude: 'float | None' = None, target_value: 'float | None' = None, width: 'float' = 1.0, spread: 'float | None' = None, start_timestep: 'int | None' = None, end_timestep: 'int | None' = None) -> 'FloatArray'",
+    "category": "local_event",
+    "short_description": "Adds a positive Gaussian-shaped local maximum around a center timestep.",
+    "core_semantic_tags": [
+      "peak",
+      "local_maximum",
+      "bump",
+      "positive_event"
+    ],
+    "what_it_does": [
+      "Adds a smooth positive local bump centered on a chosen timestep.",
+      "Lets the caller control width and amplitude or exact center value.",
+      "Can be restricted to a local editing window."
+    ],
+    "what_it_does_not_do": [
+      "Does not create a one-point outlier unless width is very small and the window is narrow.",
+      "Does not create a repeating pattern.",
+      "Does not automatically add a matching decline afterward."
+    ],
+    "required_parameters": [
+      {
+        "name": "timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "amplitude",
+        "default": null
+      },
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "width",
+        "default": 1
+      },
+      {
+        "name": "start_timestep",
+        "default": null
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "spread",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Adds a Gaussian-shaped positive bump over the chosen edit window, centered at `timestep`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "amplitude"
+      ],
+      [
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "amplitude",
+        "target_value"
+      ],
+      [
+        "width",
+        "spread"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for local positive bumps, not for sustained plateaus."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `amplitude` and `target_value`."
+    ],
+    "typical_caption_cues": [
+      "peak",
+      "local maximum",
+      "rounded bump",
+      "hump",
+      "crests at"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_peak",
+        "timestep": 5,
+        "target_value": 8,
+        "width": 1.5,
+        "start_timestep": 2,
+        "end_timestep": 8
+      },
+      "result_series": [
+        0,
+        0,
+        1.082682,
+        3.288898,
+        6.405899,
+        8,
+        6.405899,
+        3.288898,
+        1.082682,
+        0,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_peak(series, timestep=5, target_value=8.0, width=1.5, start_timestep=2, end_timestep=8)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass amplitude, target_value together.",
+          "call": {
+            "function": "add_peak",
+            "amplitude": "<value>",
+            "target_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_ramp",
+    "signature": "add_ramp(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, start_value: 'float | None' = None, end_value: 'float | None' = None, slope: 'float | None' = None) -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Sets an interval to a linear ramp with exact series values.",
+    "core_semantic_tags": [
+      "trend",
+      "linear",
+      "ramp",
+      "interval",
+      "exact_value"
+    ],
+    "what_it_does": [
+      "Replaces an interval with a linear ramp.",
+      "Lets the caller pin exact start and end values.",
+      "Provides a clean primitive for piecewise linear segments."
+    ],
+    "what_it_does_not_do": [
+      "Does not preserve the previous segment values inside the interval.",
+      "Does not create curvature.",
+      "Does not add oscillation or local events."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "start_value",
+        "default": null
+      },
+      {
+        "name": "end_value",
+        "default": null
+      },
+      {
+        "name": "slope",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Overwrites every value in the inclusive interval with evenly spaced linear values between the chosen endpoints.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "end_value"
+      ],
+      [
+        "slope"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "end_value",
+        "slope"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use this for exact piecewise linear segments that should overwrite the interval.",
+      "Prefer this when the caption specifies absolute levels, such as moving from one series value to another over time."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `end_value` and `slope` in the same call.",
+      "Do not replace additive drift semantics with this primitive unless the caption is describing the actual series values in the interval."
+    ],
+    "typical_caption_cues": [
+      "ramps up",
+      "ramps down",
+      "linearly rises to",
+      "linearly falls to",
+      "moves from X to Y",
+      "piecewise linear segment"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_ramp",
+        "start_timestep": 1,
+        "end_timestep": 3,
+        "start_value": 2,
+        "end_value": 6
+      },
+      "result_series": [
+        0,
+        2,
+        4,
+        6,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_ramp(series, start_timestep=1, end_timestep=3, start_value=2.0, end_value=6.0)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass end_value, slope together.",
+          "call": {
+            "function": "add_ramp",
+            "end_value": "<value>",
+            "slope": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_seasonality",
+    "signature": "add_seasonality(series: 'ArrayLike', start_timestep: 'int | None' = None, end_timestep: 'int | None' = None, *, amplitude: 'float', period: 'float', phase: 'float' = 0.0, baseline: 'float' = 0.0, waveform: 'str' = 'sine') -> 'FloatArray'",
+    "category": "seasonal",
+    "short_description": "Adds a periodic waveform over an interval.",
+    "core_semantic_tags": [
+      "seasonality",
+      "periodic",
+      "cycle",
+      "waveform",
+      "oscillation"
+    ],
+    "what_it_does": [
+      "Adds a periodic signal with configurable amplitude, period, phase, and waveform.",
+      "Supports sine, cosine, square, sawtooth, and triangle patterns.",
+      "Can be scoped to any inclusive interval."
+    ],
+    "what_it_does_not_do": [
+      "Does not infer period from data.",
+      "Does not create one-off isolated peaks or spikes.",
+      "Does not add stochastic noise by itself."
+    ],
+    "required_parameters": [
+      {
+        "name": "amplitude"
+      },
+      {
+        "name": "period"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "start_timestep",
+        "default": null
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "phase",
+        "default": 0
+      },
+      {
+        "name": "baseline",
+        "default": 0
+      },
+      {
+        "name": "waveform",
+        "default": "sine"
+      }
+    ],
+    "exact_effect_on_series": "Adds `baseline + amplitude * waveform(angle)` to each timestep in the interval, where `angle` advances according to `period` and `phase`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "amplitude",
+        "period"
+      ]
+    ],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use only when the caption truly describes repeating periodic structure."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use for irregular noise or one-off oscillations."
+    ],
+    "typical_caption_cues": [
+      "seasonal",
+      "periodic",
+      "cyclical",
+      "repeating pattern",
+      "wave-like",
+      "oscillation with period"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_seasonality",
+        "start_timestep": 2,
+        "end_timestep": 5,
+        "amplitude": 2,
+        "period": 4,
+        "waveform": "sine"
+      },
+      "result_series": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        -2,
+        0,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_seasonality(series, start_timestep=2, end_timestep=5, amplitude=2.0, period=4.0, waveform='sine')"
+        }
+      ],
+      "invalid": []
+    }
+  },
+  {
+    "function_name": "add_spike",
+    "signature": "add_spike(series: 'ArrayLike', timestep: 'int', *, amplitude: 'float | None' = None, target_value: 'float | None' = None, width: 'int' = 0, half_width: 'int | None' = None) -> 'FloatArray'",
+    "category": "local_event",
+    "short_description": "Adds a sharp positive event centered on a timestep.",
+    "core_semantic_tags": [
+      "spike",
+      "sharp_event",
+      "positive_event",
+      "local_jump"
+    ],
+    "what_it_does": [
+      "Adds a sharp one-point or triangular positive event.",
+      "Supports exact target value or relative amplitude.",
+      "Works well for narrow isolated positive excursions."
+    ],
+    "what_it_does_not_do": [
+      "Does not create a smooth Gaussian bump like `add_peak`.",
+      "Does not affect distant timesteps outside the narrow width window.",
+      "Does not create a sustained higher level after the event."
+    ],
+    "required_parameters": [
+      {
+        "name": "timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "amplitude",
+        "default": null
+      },
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "width",
+        "default": 0
+      },
+      {
+        "name": "half_width",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Adds either a single-point jump at `timestep` or a narrow triangular positive event centered at `timestep`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "amplitude"
+      ],
+      [
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "amplitude",
+        "target_value"
+      ],
+      [
+        "width",
+        "half_width"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for sharp upward events at one timestep or a very narrow window."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `amplitude` and `target_value`."
+    ],
+    "typical_caption_cues": [
+      "spike",
+      "sharp rise",
+      "sudden jump",
+      "brief surge",
+      "isolated positive event"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_spike",
+        "timestep": 3,
+        "target_value": 4
+      },
+      "result_series": [
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_spike(series, timestep=3, target_value=4.0)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass amplitude, target_value together.",
+          "call": {
+            "function": "add_spike",
+            "amplitude": "<value>",
+            "target_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_trend",
+    "signature": "add_trend(series: 'ArrayLike', start_timestep: 'int | None' = None, end_timestep: 'int | None' = None, *, slope: 'float | None' = None, start_value: 'float | None' = None, end_value: 'float | None' = None, start_offset: 'float | None' = None, end_offset: 'float | None' = None) -> 'FloatArray'",
+    "category": "trend",
+    "short_description": "Adds an additive linear drift over an inclusive interval.",
+    "core_semantic_tags": [
+      "trend",
+      "linear",
+      "interval",
+      "upward",
+      "downward"
+    ],
+    "what_it_does": [
+      "Adds a linearly changing offset across an interval.",
+      "Supports slope-driven or endpoint-offset-driven specification.",
+      "Leaves values outside the interval unchanged."
+    ],
+    "what_it_does_not_do": [
+      "Does not set the interval to exact series values.",
+      "Does not model exponential curvature.",
+      "Does not create a discrete level jump by itself."
+    ],
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "slope",
+        "default": null
+      },
+      {
+        "name": "start_value",
+        "default": null
+      },
+      {
+        "name": "end_value",
+        "default": null
+      },
+      {
+        "name": "start_offset",
+        "default": null
+      },
+      {
+        "name": "end_offset",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Adds a linear delta to each timestep in the inclusive interval `[start_timestep, end_timestep]`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "slope"
+      ],
+      [
+        "start_value",
+        "end_value"
+      ],
+      [
+        "start_offset",
+        "end_offset"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "slope",
+        "start_value"
+      ],
+      [
+        "slope",
+        "end_value"
+      ],
+      [
+        "slope",
+        "start_offset"
+      ],
+      [
+        "slope",
+        "end_offset"
+      ],
+      [
+        "start_value",
+        "start_offset"
+      ],
+      [
+        "end_value",
+        "end_offset"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use `slope` for additive drift relative to an existing baseline.",
+      "Prefer `start_offset`/`end_offset` when describing endpoint offsets explicitly.",
+      "Use `add_ramp` instead when the caption specifies the actual series values at the start and end of an interval."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not treat endpoint offsets as overwrite-style setters on a nonzero baseline.",
+      "Do not pass `slope` together with endpoint offset arguments.",
+      "Do not use this primitive for captions of the form 'from level A to level B' when A and B are absolute series values.",
+      "Do not interpret `start_value` and `end_value` as absolute levels; they are legacy names for additive endpoint deltas."
+    ],
+    "typical_caption_cues": [
+      "upward trend",
+      "downward trend",
+      "gradual increase",
+      "gradual decline",
+      "drift",
+      "steady rise",
+      "steady fall"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "call": {
+        "function": "add_trend",
+        "start_timestep": 1,
+        "end_timestep": 4,
+        "slope": 1.5
+      },
+      "result_series": [
+        0,
+        0,
+        1.5,
+        3,
+        4.5
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_trend(series, start_timestep=1, end_timestep=4, slope=1.5)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass slope, start_value together.",
+          "call": {
+            "function": "add_trend",
+            "slope": "<value>",
+            "start_value": "<value>"
+          }
+        },
+        {
+          "reason": "Do not pass slope, end_value together.",
+          "call": {
+            "function": "add_trend",
+            "slope": "<value>",
+            "end_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_trough",
+    "signature": "add_trough(series: 'ArrayLike', timestep: 'int', *, amplitude: 'float | None' = None, target_value: 'float | None' = None, width: 'float' = 1.0, spread: 'float | None' = None, start_timestep: 'int | None' = None, end_timestep: 'int | None' = None) -> 'FloatArray'",
+    "category": "local_event",
+    "short_description": "Adds a negative Gaussian-shaped local minimum around a center timestep.",
+    "core_semantic_tags": [
+      "trough",
+      "local_minimum",
+      "valley",
+      "negative_event"
+    ],
+    "what_it_does": [
+      "Adds a smooth negative local dip centered on a chosen timestep.",
+      "Lets the caller control width and amplitude or exact center value.",
+      "Supports local editing windows just like `add_peak`."
+    ],
+    "what_it_does_not_do": [
+      "Does not create a missing interval.",
+      "Does not imply a long-term downward trend.",
+      "Does not create a one-point outlier unless the caller uses a very narrow edit."
+    ],
+    "required_parameters": [
+      {
+        "name": "timestep"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "amplitude",
+        "default": null
+      },
+      {
+        "name": "target_value",
+        "default": null
+      },
+      {
+        "name": "width",
+        "default": 1
+      },
+      {
+        "name": "start_timestep",
+        "default": null
+      },
+      {
+        "name": "end_timestep",
+        "default": null
+      },
+      {
+        "name": "spread",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Subtracts a Gaussian-shaped bump over the chosen edit window, centered at `timestep`.",
+    "behavior": "deterministic",
+    "effect_type": "additive",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "amplitude"
+      ],
+      [
+        "target_value"
+      ]
+    ],
+    "mutually_exclusive_args": [
+      [
+        "amplitude",
+        "target_value"
+      ],
+      [
+        "width",
+        "spread"
+      ]
+    ],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use for local negative bumps, not for sustained lower regimes."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not pass both `amplitude` and `target_value`."
+    ],
+    "typical_caption_cues": [
+      "trough",
+      "local minimum",
+      "valley",
+      "rounded dip",
+      "bottoms out"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10
+      ],
+      "call": {
+        "function": "add_trough",
+        "timestep": 4,
+        "target_value": 3,
+        "width": 1,
+        "start_timestep": 2,
+        "end_timestep": 6
+      },
+      "result_series": [
+        10,
+        10,
+        9.052653,
+        5.754285,
+        3,
+        5.754285,
+        9.052653,
+        10,
+        10
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_trough(series, timestep=4, target_value=3.0, width=1.0, start_timestep=2, end_timestep=6)"
+        }
+      ],
+      "invalid": [
+        {
+          "reason": "Do not pass amplitude, target_value together.",
+          "call": {
+            "function": "add_trough",
+            "amplitude": "<value>",
+            "target_value": "<value>"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "function_name": "add_volatility",
+    "signature": "add_volatility(series: 'ArrayLike', start_timestep: 'int', end_timestep: 'int', *, volatility_scale: 'float', baseline: 'float | None' = None) -> 'FloatArray'",
+    "category": "stochastic",
+    "short_description": "Scales deviations from a baseline within an interval.",
+    "core_semantic_tags": [
+      "volatility",
+      "variance",
+      "amplitude_scaling",
+      "dispersion"
+    ],
+    "what_it_does": [
+      "Amplifies or dampens deviations from a baseline within an interval.",
+      "Works on existing structure already present in the segment.",
+      "Provides an atomic primitive for changing fluctuation amplitude."
+    ],
+    "what_it_does_not_do": [
+      "Does not create new random noise by itself.",
+      "Does not change the baseline trend unless deviation scaling implies it indirectly.",
+      "Does not infer the baseline automatically beyond a simple interval mean fallback."
+    ],
+    "required_parameters": [
+      {
+        "name": "start_timestep"
+      },
+      {
+        "name": "end_timestep"
+      },
+      {
+        "name": "volatility_scale"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "baseline",
+        "default": null
+      }
+    ],
+    "exact_effect_on_series": "Replaces each value in the interval with `baseline + (value - baseline) * volatility_scale`.",
+    "behavior": "deterministic",
+    "effect_type": "overwrite",
+    "mutability": "returns_new_series",
+    "required_arg_patterns": [
+      [
+        "volatility_scale"
+      ]
+    ],
+    "mutually_exclusive_args": [],
+    "recommended_usage": [
+      "Assign the returned array back to `series`.",
+      "Use to rescale existing deviations around a known baseline."
+    ],
+    "forbidden_usage_patterns": [
+      "Do not use on a flat zero baseline expecting it to create variation."
+    ],
+    "typical_caption_cues": [
+      "more volatile",
+      "less volatile",
+      "volatility increases",
+      "volatility decreases",
+      "larger swings",
+      "smaller swings"
+    ],
+    "minimal_usage_example": {
+      "initial_series": [
+        0,
+        8,
+        10,
+        12,
+        20
+      ],
+      "call": {
+        "function": "add_volatility",
+        "start_timestep": 1,
+        "end_timestep": 3,
+        "volatility_scale": 2,
+        "baseline": 10
+      },
+      "result_series": [
+        0,
+        6,
+        10,
+        14,
+        20
+      ]
+    },
+    "canonical_examples": {
+      "valid": [
+        {
+          "description": "Assign the returned array back to `series`.",
+          "code": "series = add_volatility(series, start_timestep=1, end_timestep=3, volatility_scale=2.0, baseline=10.0)"
+        }
+      ],
+      "invalid": []
+    }
+  }
+]

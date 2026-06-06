@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/eval_report.schema.json",
+  "title": "TimeSeriesEvaluationReport",
+  "description": "Strict contract for evaluating registry validation, planning, code generation, execution, and semantic alignment in the time-series pipeline.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "input_description",
+    "registry_validation",
+    "plan_validation_status",
+    "code_generation_status",
+    "execution_status",
+    "semantic_alignment_score",
+    "unresolved_semantics",
+    "failure_reasons"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registry_validation": {
+      "$ref": "#/$defs/validationStatus"
+    },
+    "plan_validation_status": {
+      "$ref": "#/$defs/validationStatus"
+    },
+    "code_generation_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "draft_generated",
+        "final_generated",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "failed",
+            "not_run"
+          ]
+        },
+        "draft_generated": {
+          "type": "boolean"
+        },
+        "final_generated": {
+          "type": "boolean"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "execution_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "success",
+            "failed",
+            "not_run"
+          ]
+        },
+        "signal_summary": {
+          "$ref": "#/$defs/signalSummary"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "semantic_alignment_score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "overall"
+      ],
+      "properties": {
+        "overall": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "description_to_plan": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "plan_to_code": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "code_to_signal": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "unresolved_semantics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unresolvedSemantic"
+      }
+    },
+    "failure_reasons": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/failureReason"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "validationStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "schema_path",
+        "target_path",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "unavailable",
+            "not_run"
+          ]
+        },
+        "schema_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "signalSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length"
+      ],
+      "properties": {
+        "length": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        },
+        "std": {
+          "type": "number"
+        }
+      }
+    },
+    "unresolvedSemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "related_step_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "failureReason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "stage": {
+          "type": "string",
+          "enum": [
+            "registry_validation",
+            "planning",
+            "plan_validation",
+            "code_generation",
+            "execution",
+            "evaluation"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "related_step_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

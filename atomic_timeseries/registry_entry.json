@@ -1,0 +1,25 @@
+{
+  "name": "<function_name>",
+  "category": "<base|trend|periodic|transient|noise|shape|event>",
+  "description": "<one sentence semantic description>",
+  "args": {
+    "<arg1>": "<type>",
+    "<arg2>": "<type>"
+  },
+  "required_args": ["<arg1>"],
+  "defaults": {
+    "<optional_arg>": "<default_value>"
+  },
+  "aliases": ["<alias1>", "<alias2>"],
+  "semantic_triggers": ["<text phrase 1>", "<text phrase 2>"],
+  "constraints": {
+    "<arg1>": "<constraint rule>"
+  },
+  "examples": [
+    {
+      "text": "<example natural language>",
+      "call": "<example function call>"
+    }
+  ],
+  "composable_from": []
+}

@@ -1,0 +1,481 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/plan.schema.json",
+  "title": "TimeSeriesPlan",
+  "description": "Strict contract for converting a natural-language time-series description into a validated execution plan.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "input_description",
+    "registry_validation",
+    "global_context",
+    "steps",
+    "unresolved_semantics",
+    "needs_library_extension"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registry_validation": {
+      "$ref": "#/$defs/validationStatus"
+    },
+    "global_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length",
+        "numeric_range"
+      ],
+      "properties": {
+        "length": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "numeric_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            }
+          }
+        },
+        "dt": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "seed": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/primitiveStep"
+          },
+          {
+            "$ref": "#/$defs/unresolvedStep"
+          }
+        ]
+      }
+    },
+    "unresolved_semantics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unresolvedSemantic"
+      }
+    },
+    "needs_library_extension": {
+      "type": "boolean"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "validationStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "schema_path",
+        "target_path",
+        "errors"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "invalid",
+            "unavailable",
+            "not_run"
+          ]
+        },
+        "schema_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "parameterValue": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null",
+        "array"
+      ],
+      "items": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "primitiveStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "primitive",
+        "parameters",
+        "semantic_role",
+        "effect_type",
+        "confidence",
+        "source_text",
+        "needs_library_extension"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "primitive"
+        },
+        "primitive": {
+          "type": "string",
+          "pattern": "^add_[a-z0-9_]+$"
+        },
+        "parameters": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/parameterValue"
+          }
+        },
+        "semantic_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effect_type": {
+          "type": "string",
+          "enum": [
+            "overwrite",
+            "additive"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        },
+        "semantic_layer": {
+          "$ref": "#/$defs/semanticLayer"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "protected_constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/protectedConstraint"
+          }
+        },
+        "semantic_cues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/semanticCue"
+          }
+        },
+        "inferred_constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inferredConstraint"
+          }
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "needs_library_extension": {
+          "const": false
+        }
+      }
+    },
+    "unresolvedStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "description",
+        "semantic_role",
+        "confidence",
+        "source_text",
+        "reason",
+        "needs_library_extension"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "unresolved"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semantic_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "semantic_layer": {
+          "$ref": "#/$defs/semanticLayer"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "candidate_compositions_considered": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "needs_library_extension": {
+          "const": true
+        }
+      }
+    },
+    "unresolvedSemantic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "source_text",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_compositions_considered": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "semanticLayer": {
+      "type": "string",
+      "enum": [
+        "global_scaffold",
+        "segment_structure",
+        "local_event",
+        "texture",
+        "missingness"
+      ]
+    },
+    "protectedConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "constant_segment",
+            "monotone_window",
+            "point_value"
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "nondecreasing",
+            "nonincreasing"
+          ]
+        },
+        "timestep": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "value": {
+          "type": "number"
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "inferredConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "slope_sign",
+            "endpoint_order",
+            "monotonicity"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "enum": [
+            "negative",
+            "positive",
+            "zero",
+            "descending",
+            "ascending",
+            "flat",
+            "nonincreasing",
+            "nondecreasing"
+          ]
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "semanticCue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "decline",
+            "increase",
+            "plateau",
+            "oscillation",
+            "light_noise"
+          ]
+        },
+        "source_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

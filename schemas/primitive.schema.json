@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/primitive.schema.json",
+  "title": "PrimitiveRegistry",
+  "description": "Strict contract for atomic primitive registry entries used during planning.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "$ref": "#/$defs/primitiveEntry"
+  },
+  "$defs": {
+    "scalarValue": {
+      "type": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "null"
+      ]
+    },
+    "stringMap": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "example": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "call"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "call": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "primitiveEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "category",
+        "description",
+        "args",
+        "required_args",
+        "defaults",
+        "aliases",
+        "semantic_triggers",
+        "constraints",
+        "examples",
+        "composable_from"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^add_[a-z0-9_]+$"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "base",
+            "trend",
+            "periodic",
+            "transient",
+            "noise",
+            "shape",
+            "event"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "$ref": "#/$defs/stringMap"
+        },
+        "required_args": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "defaults": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/scalarValue"
+          }
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "semantic_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "constraints": {
+          "$ref": "#/$defs/stringMap"
+        },
+        "examples": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/example"
+          }
+        },
+        "composable_from": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

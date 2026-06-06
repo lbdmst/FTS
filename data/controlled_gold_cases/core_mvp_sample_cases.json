@@ -1,0 +1,112 @@
+[
+  {
+    "semantic_spec": {
+      "case_id": "core_mvp_flat",
+      "description": "The series stays flat at 2 from timestep 0 through 7.",
+      "length": 8,
+      "features": [
+        {
+          "id": "f_flat",
+          "semantic": "flat",
+          "expected_primitives": ["add_flat"],
+          "window": [0, 7],
+          "parameters": {"target_value": 2.0},
+          "effect_type": "overwrite",
+          "checker": "check_flat",
+          "required": true
+        }
+      ]
+    },
+    "plan": {
+      "version": "1.0",
+      "input_description": "The series stays flat at 2 from timestep 0 through 7.",
+      "registry_validation": {
+        "status": "valid",
+        "schema_path": "schemas/primitive.schema.json",
+        "target_path": "atomic_timeseries/registry.json",
+        "errors": []
+      },
+      "global_context": {
+        "length": 8,
+        "numeric_range": {"min": 0.0, "max": 3.0},
+        "dt": null,
+        "seed": 7
+      },
+      "steps": [
+        {
+          "id": "step_1",
+          "kind": "primitive",
+          "primitive": "add_flat",
+          "parameters": {"start_timestep": 0, "end_timestep": 7, "target_value": 2.0},
+          "semantic_role": "flat baseline",
+          "semantic_layer": "segment_structure",
+          "priority": 0,
+          "protected_constraints": [],
+          "semantic_cues": [],
+          "effect_type": "overwrite",
+          "confidence": 1.0,
+          "source_text": "stays flat at 2 from timestep 0 through 7",
+          "needs_library_extension": false
+        }
+      ],
+      "unresolved_semantics": [],
+      "needs_library_extension": false,
+      "assumptions": []
+    }
+  },
+  {
+    "semantic_spec": {
+      "case_id": "core_mvp_ramp",
+      "description": "The series ramps from 1 to 4 between timestep 0 and timestep 7.",
+      "length": 8,
+      "features": [
+        {
+          "id": "f_ramp",
+          "semantic": "linear_ramp",
+          "expected_primitives": ["add_ramp"],
+          "window": [0, 7],
+          "parameters": {"start_value": 1.0, "end_value": 4.0},
+          "effect_type": "overwrite",
+          "checker": "check_ramp",
+          "required": true
+        }
+      ]
+    },
+    "plan": {
+      "version": "1.0",
+      "input_description": "The series ramps from 1 to 4 between timestep 0 and timestep 7.",
+      "registry_validation": {
+        "status": "valid",
+        "schema_path": "schemas/primitive.schema.json",
+        "target_path": "atomic_timeseries/registry.json",
+        "errors": []
+      },
+      "global_context": {
+        "length": 8,
+        "numeric_range": {"min": 0.0, "max": 5.0},
+        "dt": null,
+        "seed": 7
+      },
+      "steps": [
+        {
+          "id": "step_1",
+          "kind": "primitive",
+          "primitive": "add_ramp",
+          "parameters": {"start_timestep": 0, "end_timestep": 7, "start_value": 1.0, "end_value": 4.0},
+          "semantic_role": "global ramp",
+          "semantic_layer": "segment_structure",
+          "priority": 0,
+          "protected_constraints": [],
+          "semantic_cues": [],
+          "effect_type": "overwrite",
+          "confidence": 1.0,
+          "source_text": "ramps from 1 to 4 between timestep 0 and timestep 7",
+          "needs_library_extension": false
+        }
+      ],
+      "unresolved_semantics": [],
+      "needs_library_extension": false,
+      "assumptions": []
+    }
+  }
+]

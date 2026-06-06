@@ -1,0 +1,740 @@
+[
+  {
+    "name": "add_change_point",
+    "category": "event",
+    "description": "Applies an additive post-anchor regime change with an optional immediate level jump and ongoing slope change.",
+    "args": {
+      "anchor_timestep": "int",
+      "level_change": "float",
+      "slope_change": "float",
+      "end_timestep": "int|null",
+      "smooth": "bool"
+    },
+    "required_args": [
+      "anchor_timestep"
+    ],
+    "defaults": {
+      "level_change": 0,
+      "slope_change": 0,
+      "end_timestep": null,
+      "smooth": false
+    },
+    "aliases": [
+      "changepoint",
+      "breakpoint",
+      "regime shift"
+    ],
+    "semantic_triggers": [
+      "change point",
+      "after this point the level shifts",
+      "sudden structural break",
+      "slope changes after"
+    ],
+    "constraints": {
+      "anchor_timestep": "Must be a valid timestep in the series.",
+      "level_change": "At least one of level_change or slope_change must be non-zero.",
+      "slope_change": "At least one of level_change or slope_change must be non-zero.",
+      "end_timestep": "If provided, must be greater than or equal to anchor_timestep and within series bounds."
+    },
+    "examples": [
+      {
+        "text": "After timestep 40, the signal jumps up by 2 and then climbs faster.",
+        "call": "add_change_point(series, anchor_timestep=40, level_change=2.0, slope_change=0.15)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_decay",
+    "category": "trend",
+    "description": "Overwrites an interval with an exponential decay-shaped curve between start and end values.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "start_value": "float|null",
+      "end_value": "float|null",
+      "decay_rate": "float"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep"
+    ],
+    "defaults": {
+      "start_value": null,
+      "end_value": null,
+      "decay_rate": 1
+    },
+    "aliases": [
+      "exponential decay",
+      "cooldown curve",
+      "falloff"
+    ],
+    "semantic_triggers": [
+      "decays toward",
+      "falls off exponentially",
+      "fast drop then flatten",
+      "cooldown"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds.",
+      "decay_rate": "Must be positive."
+    },
+    "examples": [
+      {
+        "text": "From timestep 20 to 60, decay smoothly from 10 down to 2.",
+        "call": "add_decay(series, start_timestep=20, end_timestep=60, start_value=10.0, end_value=2.0, decay_rate=2.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_dip",
+    "category": "event",
+    "description": "Adds a sharp negative local event at a timestep, optionally spread across a narrow triangular window.",
+    "args": {
+      "timestep": "int",
+      "amplitude": "float|null",
+      "target_value": "float|null",
+      "width": "int",
+      "half_width": "int|null"
+    },
+    "required_args": [
+      "timestep"
+    ],
+    "defaults": {
+      "amplitude": null,
+      "target_value": null,
+      "width": 0,
+      "half_width": null
+    },
+    "aliases": [
+      "negative spike",
+      "sharp drop",
+      "downward impulse"
+    ],
+    "semantic_triggers": [
+      "sudden dip",
+      "sharp downward spike",
+      "single-point drop",
+      "brief negative impulse"
+    ],
+    "constraints": {
+      "timestep": "Must be a valid timestep in the series.",
+      "amplitude": "Provide either amplitude or target_value, not both.",
+      "target_value": "Provide either amplitude or target_value, not both.",
+      "width": "Must be zero or greater; provide either width or half_width, not both.",
+      "half_width": "Canonical alias for the integer half-window radius; provide either half_width or width, not both."
+    },
+    "examples": [
+      {
+        "text": "At timestep 75, add a narrow downward spike of magnitude 4.",
+        "call": "add_dip(series, timestep=75, amplitude=4.0, width=1)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_flat",
+    "category": "shape",
+    "description": "Overwrites an interval with a constant value, creating an exactly flat segment.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "target_value": "float"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep",
+      "target_value"
+    ],
+    "defaults": {},
+    "aliases": [
+      "constant segment",
+      "flat segment",
+      "hold constant"
+    ],
+    "semantic_triggers": [
+      "stays flat",
+      "constant value",
+      "flat line",
+      "hold steady"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds."
+    },
+    "examples": [
+      {
+        "text": "Keep the signal flat at 3 between timesteps 10 and 25.",
+        "call": "add_flat(series, start_timestep=10, end_timestep=25, target_value=3.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_gap",
+    "category": "shape",
+    "description": "Overwrites an interval with missing values or a fixed fill value to represent a gap.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "fill_value": "float"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep"
+    ],
+    "defaults": {
+      "fill_value": "NaN"
+    },
+    "aliases": [
+      "missing segment",
+      "data gap",
+      "masked interval"
+    ],
+    "semantic_triggers": [
+      "gap in the data",
+      "missing interval",
+      "drop out this window",
+      "mask this segment"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds."
+    },
+    "examples": [
+      {
+        "text": "Make timesteps 30 through 40 missing.",
+        "call": "add_gap(series, start_timestep=30, end_timestep=40)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_growth",
+    "category": "trend",
+    "description": "Overwrites an interval with an exponential growth-shaped curve between start and end values.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "start_value": "float|null",
+      "end_value": "float|null",
+      "growth_rate": "float"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep"
+    ],
+    "defaults": {
+      "start_value": null,
+      "end_value": null,
+      "growth_rate": 1
+    },
+    "aliases": [
+      "exponential rise",
+      "accelerating growth",
+      "rising curve"
+    ],
+    "semantic_triggers": [
+      "grows exponentially",
+      "accelerates upward",
+      "slow start then rise",
+      "compounding increase"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds.",
+      "growth_rate": "Must be positive."
+    },
+    "examples": [
+      {
+        "text": "From timestep 15 to 50, grow from 1 to 8 with accelerating curvature.",
+        "call": "add_growth(series, start_timestep=15, end_timestep=50, start_value=1.0, end_value=8.0, growth_rate=2.5)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_level_shift",
+    "category": "event",
+    "description": "Adds a sustained level shift from a start timestep through the rest of a tail interval, optionally with a smooth onset.",
+    "args": {
+      "start_timestep": "int|null",
+      "anchor_timestep": "int|null",
+      "shift": "float|null",
+      "target_value": "float|null",
+      "end_timestep": "int|null",
+      "smooth": "bool"
+    },
+    "required_args": [],
+    "defaults": {
+      "start_timestep": null,
+      "anchor_timestep": null,
+      "shift": null,
+      "target_value": null,
+      "end_timestep": null,
+      "smooth": false
+    },
+    "aliases": [
+      "step shift",
+      "regime level shift",
+      "offset jump"
+    ],
+    "semantic_triggers": [
+      "steps up",
+      "level shifts",
+      "offset increases after",
+      "sustained jump"
+    ],
+    "constraints": {
+      "start_timestep": "Provide either start_timestep or anchor_timestep, not both; the chosen timestep must be within the series bounds.",
+      "anchor_timestep": "Provide either anchor_timestep or start_timestep, not both; the chosen timestep must be within the series bounds.",
+      "shift": "Provide either shift or target_value, not both.",
+      "target_value": "Provide either shift or target_value, not both.",
+      "end_timestep": "If provided, must be greater than or equal to the chosen start timestep and within series bounds."
+    },
+    "examples": [
+      {
+        "text": "Starting at timestep 60, shift the series upward by 1.5.",
+        "call": "add_level_shift(series, start_timestep=60, shift=1.5)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_noise",
+    "category": "noise",
+    "description": "Adds Gaussian noise over an interval using a deterministic random seed or generator.",
+    "args": {
+      "start_timestep": "int|null",
+      "end_timestep": "int|null",
+      "noise_scale": "float",
+      "random_seed": "int|null",
+      "random_generator": "np.random.Generator|null"
+    },
+    "required_args": [
+      "noise_scale"
+    ],
+    "defaults": {
+      "start_timestep": null,
+      "end_timestep": null,
+      "random_seed": null,
+      "random_generator": null
+    },
+    "aliases": [
+      "gaussian noise",
+      "jitter",
+      "random variation"
+    ],
+    "semantic_triggers": [
+      "add noise",
+      "jitter",
+      "noisy segment",
+      "random fluctuations"
+    ],
+    "constraints": {
+      "start_timestep": "If provided, must be within the series bounds.",
+      "end_timestep": "If provided, must be greater than or equal to start_timestep and within series bounds.",
+      "noise_scale": "Must be non-negative.",
+      "random_seed": "Provide either random_seed or random_generator, not both.",
+      "random_generator": "Provide either random_seed or random_generator, not both."
+    },
+    "examples": [
+      {
+        "text": "Add mild Gaussian noise between timesteps 0 and 99 using seed 7.",
+        "call": "add_noise(series, start_timestep=0, end_timestep=99, noise_scale=0.2, random_seed=7)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_outlier",
+    "category": "event",
+    "description": "Edits a single timestep to an exact value or by an additive one-point offset, creating an outlier.",
+    "args": {
+      "timestep": "int",
+      "target_value": "float|null",
+      "relative_change": "float|null",
+      "delta": "float|null"
+    },
+    "required_args": [
+      "timestep"
+    ],
+    "defaults": {
+      "target_value": null,
+      "relative_change": null,
+      "delta": null
+    },
+    "aliases": [
+      "single-point anomaly",
+      "isolated outlier",
+      "one-point exception"
+    ],
+    "semantic_triggers": [
+      "outlier",
+      "single anomalous point",
+      "isolated exception",
+      "one bad reading"
+    ],
+    "constraints": {
+      "timestep": "Must be a valid timestep in the series.",
+      "target_value": "Provide exactly one of target_value, relative_change, or delta.",
+      "relative_change": "Legacy additive delta name; provide exactly one of target_value, relative_change, or delta.",
+      "delta": "Canonical additive offset name; provide exactly one of target_value, relative_change, or delta."
+    },
+    "examples": [
+      {
+        "text": "Make timestep 12 an anomalous point at value 20.",
+        "call": "add_outlier(series, timestep=12, target_value=20.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_peak",
+    "category": "transient",
+    "description": "Adds a positive Gaussian-shaped local bump centered on a timestep within an optional edit window.",
+    "args": {
+      "timestep": "int",
+      "amplitude": "float|null",
+      "target_value": "float|null",
+      "width": "float",
+      "start_timestep": "int|null",
+      "end_timestep": "int|null",
+      "spread": "float|null"
+    },
+    "required_args": [
+      "timestep"
+    ],
+    "defaults": {
+      "amplitude": null,
+      "target_value": null,
+      "width": 1,
+      "start_timestep": null,
+      "end_timestep": null,
+      "spread": null
+    },
+    "aliases": [
+      "bump",
+      "hump",
+      "local maximum"
+    ],
+    "semantic_triggers": [
+      "local peak",
+      "rounded bump",
+      "brief hump",
+      "bell-shaped rise"
+    ],
+    "constraints": {
+      "timestep": "Must be a valid timestep in the series.",
+      "amplitude": "Provide either amplitude or target_value, not both.",
+      "target_value": "Provide either amplitude or target_value, not both.",
+      "width": "Must be positive; provide either width or spread, not both.",
+      "start_timestep": "If provided, the interval must include timestep.",
+      "end_timestep": "If provided, the interval must include timestep and be greater than or equal to start_timestep.",
+      "spread": "Canonical alias for Gaussian spread; provide either spread or width, not both."
+    },
+    "examples": [
+      {
+        "text": "Create a rounded peak centered at timestep 40 with width 3.",
+        "call": "add_peak(series, timestep=40, amplitude=5.0, width=3.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_ramp",
+    "category": "trend",
+    "description": "Overwrites an interval with a linear ramp defined by exact series values or slope.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "start_value": "float|null",
+      "end_value": "float|null",
+      "slope": "float|null"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep"
+    ],
+    "defaults": {
+      "start_value": null,
+      "end_value": null,
+      "slope": null
+    },
+    "aliases": [
+      "linear segment",
+      "straight-line ramp",
+      "piecewise linear rise"
+    ],
+    "semantic_triggers": [
+      "ramps up",
+      "linear segment",
+      "straight line between values",
+      "piecewise linear"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds.",
+      "start_value": "Use this primitive when the caption specifies absolute series levels over the interval, such as moving from one value to another.",
+      "end_value": "Provide either end_value or slope, not both. Prefer add_ramp when the caption gives an absolute endpoint level for the series.",
+      "slope": "Provide either end_value or slope, not both."
+    },
+    "examples": [
+      {
+        "text": "From timestep 5 to 20, draw a straight ramp from 1 to 6.",
+        "call": "add_ramp(series, start_timestep=5, end_timestep=20, start_value=1.0, end_value=6.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_seasonality",
+    "category": "periodic",
+    "description": "Adds a periodic waveform over an interval with configurable amplitude, period, phase, baseline, and waveform shape.",
+    "args": {
+      "start_timestep": "int|null",
+      "end_timestep": "int|null",
+      "amplitude": "float",
+      "period": "float",
+      "phase": "float",
+      "baseline": "float",
+      "waveform": "str"
+    },
+    "required_args": [
+      "amplitude",
+      "period"
+    ],
+    "defaults": {
+      "start_timestep": null,
+      "end_timestep": null,
+      "phase": 0,
+      "baseline": 0,
+      "waveform": "sine"
+    },
+    "aliases": [
+      "oscillation",
+      "cycle",
+      "periodic component"
+    ],
+    "semantic_triggers": [
+      "seasonality",
+      "oscillates",
+      "repeating cycle",
+      "periodic wave"
+    ],
+    "constraints": {
+      "start_timestep": "If provided, must be within the series bounds.",
+      "end_timestep": "If provided, must be greater than or equal to start_timestep and within series bounds.",
+      "period": "Must be positive.",
+      "waveform": "Must be one of sine, cosine, square, sawtooth, or triangle."
+    },
+    "examples": [
+      {
+        "text": "Add a sine wave with amplitude 2 and period 12 across the full series.",
+        "call": "add_seasonality(series, amplitude=2.0, period=12.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_spike",
+    "category": "event",
+    "description": "Adds a sharp positive event at a timestep, optionally spread across a narrow triangular window.",
+    "args": {
+      "timestep": "int",
+      "amplitude": "float|null",
+      "target_value": "float|null",
+      "width": "int",
+      "half_width": "int|null"
+    },
+    "required_args": [
+      "timestep"
+    ],
+    "defaults": {
+      "amplitude": null,
+      "target_value": null,
+      "width": 0,
+      "half_width": null
+    },
+    "aliases": [
+      "positive impulse",
+      "sharp spike",
+      "upward impulse"
+    ],
+    "semantic_triggers": [
+      "spike",
+      "sudden upward jump",
+      "impulse",
+      "single-point surge"
+    ],
+    "constraints": {
+      "timestep": "Must be a valid timestep in the series.",
+      "amplitude": "Provide either amplitude or target_value, not both.",
+      "target_value": "Provide either amplitude or target_value, not both.",
+      "width": "Must be zero or greater; provide either width or half_width, not both.",
+      "half_width": "Canonical alias for the integer half-window radius; provide either half_width or width, not both."
+    },
+    "examples": [
+      {
+        "text": "Insert a sharp spike at timestep 18 with amplitude 6.",
+        "call": "add_spike(series, timestep=18, amplitude=6.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_trend",
+    "category": "trend",
+    "description": "Adds an additive linear drift over an interval using either a slope or explicit additive endpoint offsets.",
+    "args": {
+      "start_timestep": "int|null",
+      "end_timestep": "int|null",
+      "slope": "float|null",
+      "start_value": "float|null",
+      "end_value": "float|null",
+      "start_offset": "float|null",
+      "end_offset": "float|null"
+    },
+    "required_args": [],
+    "defaults": {
+      "start_timestep": null,
+      "end_timestep": null,
+      "slope": null,
+      "start_value": null,
+      "end_value": null,
+      "start_offset": null,
+      "end_offset": null
+    },
+    "aliases": [
+      "linear drift",
+      "additive trend",
+      "drift"
+    ],
+    "semantic_triggers": [
+      "trending upward",
+      "linear drift",
+      "steady increase over time",
+      "tilt the series"
+    ],
+    "constraints": {
+      "start_timestep": "If provided, must be within the series bounds.",
+      "end_timestep": "If provided, must be greater than or equal to start_timestep and within series bounds.",
+      "slope": "Provide either slope or both start_value and end_value, or both start_offset and end_offset. Use slope for additive drift relative to an existing baseline, not for setting absolute series levels.",
+      "start_value": "Legacy endpoint-delta spelling. When slope is omitted, either start_value/end_value or start_offset/end_offset must both be provided; do not mix naming schemes. These values represent additive deltas, not absolute series values.",
+      "end_value": "Legacy endpoint-delta spelling. When slope is omitted, either start_value/end_value or start_offset/end_offset must both be provided; do not mix naming schemes. These values represent additive deltas, not absolute series values.",
+      "start_offset": "Canonical additive endpoint offset. Provide together with end_offset and do not mix with start_value/end_value.",
+      "end_offset": "Canonical additive endpoint offset. Provide together with start_offset and do not mix with start_value/end_value."
+    },
+    "examples": [
+      {
+        "text": "Add a steady upward drift of 0.1 per timestep from timestep 0 to 49.",
+        "call": "add_trend(series, start_timestep=0, end_timestep=49, slope=0.1)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_trough",
+    "category": "transient",
+    "description": "Adds a negative Gaussian-shaped local depression centered on a timestep within an optional edit window.",
+    "args": {
+      "timestep": "int",
+      "amplitude": "float|null",
+      "target_value": "float|null",
+      "width": "float",
+      "start_timestep": "int|null",
+      "end_timestep": "int|null",
+      "spread": "float|null"
+    },
+    "required_args": [
+      "timestep"
+    ],
+    "defaults": {
+      "amplitude": null,
+      "target_value": null,
+      "width": 1,
+      "start_timestep": null,
+      "end_timestep": null,
+      "spread": null
+    },
+    "aliases": [
+      "valley",
+      "local minimum",
+      "rounded dip"
+    ],
+    "semantic_triggers": [
+      "trough",
+      "valley",
+      "rounded dip",
+      "bell-shaped drop"
+    ],
+    "constraints": {
+      "timestep": "Must be a valid timestep in the series.",
+      "amplitude": "Provide either amplitude or target_value, not both.",
+      "target_value": "Provide either amplitude or target_value, not both.",
+      "width": "Must be positive; provide either width or spread, not both.",
+      "start_timestep": "If provided, the interval must include timestep.",
+      "end_timestep": "If provided, the interval must include timestep and be greater than or equal to start_timestep.",
+      "spread": "Canonical alias for Gaussian spread; provide either spread or width, not both."
+    },
+    "examples": [
+      {
+        "text": "Create a rounded trough centered at timestep 55 with width 2.",
+        "call": "add_trough(series, timestep=55, amplitude=3.0, width=2.0)"
+      }
+    ],
+    "composable_from": []
+  },
+  {
+    "name": "add_volatility",
+    "category": "noise",
+    "description": "Rescales existing deviations within an interval around a baseline, increasing or reducing volatility without changing the local mean reference.",
+    "args": {
+      "start_timestep": "int",
+      "end_timestep": "int",
+      "volatility_scale": "float",
+      "baseline": "float|null"
+    },
+    "required_args": [
+      "start_timestep",
+      "end_timestep",
+      "volatility_scale"
+    ],
+    "defaults": {
+      "baseline": null
+    },
+    "aliases": [
+      "variance scaling",
+      "amplify fluctuations",
+      "compress fluctuations",
+      "range-bound around a level",
+      "resistance around a level",
+      "support around a level",
+      "hovering around a level"
+    ],
+    "semantic_triggers": [
+      "increase volatility",
+      "reduce volatility",
+      "amplify fluctuations",
+      "compress deviations",
+      "resistance around",
+      "support around",
+      "range-bound around",
+      "hovering around"
+    ],
+    "constraints": {
+      "start_timestep": "Must be within the series bounds.",
+      "end_timestep": "Must be greater than or equal to start_timestep and within series bounds.",
+      "volatility_scale": "Must be non-negative."
+    },
+    "examples": [
+      {
+        "text": "Double the fluctuations between timesteps 20 and 40 around the segment mean.",
+        "call": "add_volatility(series, start_timestep=20, end_timestep=40, volatility_scale=2.0)"
+      }
+    ],
+    "composable_from": []
+  }
+]
