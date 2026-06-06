@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="LOGO.png" alt="FaithTS logo" width="180">
+</p>
+
 # FaithTS
 
 FaithTS is a registry-grounded pipeline for translating natural-language
